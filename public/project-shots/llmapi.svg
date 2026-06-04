@@ -1,0 +1,68 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="1000" fill="#07100F"/>
+  <path d="M0 0H1600V1000H0V0Z" fill="url(#bg)"/>
+  <g opacity=".22">
+    <path d="M0 160H1600M0 320H1600M0 480H1600M0 640H1600M0 800H1600" stroke="#D7E2EA"/>
+    <path d="M160 0V1000M320 0V1000M480 0V1000M640 0V1000M800 0V1000M960 0V1000M1120 0V1000M1280 0V1000M1440 0V1000" stroke="#D7E2EA"/>
+  </g>
+  <g filter="url(#glow)">
+    <path d="M274 704C378 594 498 546 638 560C800 576 880 722 1040 714C1154 708 1240 616 1326 488" stroke="#58E6FF" stroke-width="7" stroke-linecap="round" stroke-dasharray="28 28"/>
+    <path d="M318 402C438 338 566 338 704 402C806 448 886 528 1006 528C1118 528 1226 474 1316 392" stroke="#D9FF4A" stroke-width="5" stroke-linecap="round" stroke-dasharray="20 26"/>
+  </g>
+  <g transform="translate(556 252)">
+    <ellipse cx="244" cy="466" rx="246" ry="50" fill="#000" opacity=".36"/>
+    <g filter="url(#botShadow)">
+      <rect x="106" y="222" width="276" height="270" rx="68" fill="url(#torso)" stroke="#D7E2EA" stroke-opacity=".42" stroke-width="4"/>
+      <rect x="70" y="96" width="348" height="214" rx="78" fill="url(#head)" stroke="#D7E2EA" stroke-opacity=".58" stroke-width="4"/>
+      <rect x="124" y="144" width="240" height="96" rx="38" fill="#07100F" stroke="#58E6FF" stroke-opacity=".52" stroke-width="3"/>
+      <circle cx="188" cy="192" r="19" fill="#D9FF4A"/>
+      <circle cx="302" cy="192" r="19" fill="#D9FF4A"/>
+      <path d="M218 235C250 253 282 253 314 235" stroke="#58E6FF" stroke-width="9" stroke-linecap="round"/>
+      <path d="M244 96V34" stroke="#D7E2EA" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="244" cy="24" r="21" fill="#FF7A1A"/>
+      <circle cx="244" cy="354" r="50" fill="#07100F" stroke="#58E6FF" stroke-width="5"/>
+      <path d="M244 326V382M216 354H272" stroke="#D9FF4A" stroke-width="8" stroke-linecap="round"/>
+    </g>
+  </g>
+  <g font-family="Inter, Arial, sans-serif" font-weight="900" text-transform="uppercase">
+    <text x="86" y="138" fill="#D9FF4A" font-size="32" letter-spacing="4">Ian Goh Lab</text>
+    <text x="86" y="246" fill="#FFFFFF" font-size="124" letter-spacing="-4">LLM API</text>
+    <text x="92" y="314" fill="#D7E2EA" fill-opacity=".72" font-size="32" font-weight="600">Model gateway / agents / prompt tools</text>
+    <text x="92" y="866" fill="#D7E2EA" fill-opacity=".82" font-size="30" letter-spacing="2">LLM / API</text>
+  </g>
+  <g transform="translate(1050 118)">
+    <rect width="416" height="172" rx="28" fill="#0C0C0C" fill-opacity=".7" stroke="#D7E2EA" stroke-opacity=".26"/>
+    <circle cx="58" cy="60" r="14" fill="#D9FF4A"/>
+    <circle cx="104" cy="60" r="14" fill="#58E6FF"/>
+    <circle cx="150" cy="60" r="14" fill="#FF7A1A"/>
+    <path d="M54 120H360" stroke="#D7E2EA" stroke-opacity=".45" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <defs>
+    <radialGradient id="bg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(900 430) rotate(128) scale(840 1040)">
+      <stop stop-color="#123B3E"/>
+      <stop offset=".42" stop-color="#0E1817"/>
+      <stop offset="1" stop-color="#090A09"/>
+    </radialGradient>
+    <linearGradient id="head" x1="70" y1="96" x2="424" y2="312" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FFF4"/>
+      <stop offset=".46" stop-color="#A9B8BD"/>
+      <stop offset="1" stop-color="#3B4448"/>
+    </linearGradient>
+    <linearGradient id="torso" x1="106" y1="222" x2="382" y2="492" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EAF4F7"/>
+      <stop offset=".48" stop-color="#5E6B72"/>
+      <stop offset="1" stop-color="#151A1D"/>
+    </linearGradient>
+    <filter id="glow" x="-40" y="280" width="1680" height="520" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="botShadow" x="20" y="-10" width="448" height="560" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="28" stdDeviation="38" flood-color="#58E6FF" flood-opacity=".22"/>
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity=".5"/>
+    </filter>
+  </defs>
+</svg>
