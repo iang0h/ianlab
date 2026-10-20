@@ -28,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import type { CSSProperties, FormEvent, PointerEvent, ReactNode } from 'react'
 import './App.css'
+import FindYourZone from './FindYourZone'
 
 type ProjectCategory = 'Brand' | 'Venture' | 'Growth' | 'AI Utility' | 'Simulation' | 'Creative'
 
@@ -627,6 +628,9 @@ function CinematicHero() {
           <a className="transition hover:text-signal" href="#systems">
             Systems
           </a>
+          <a className="transition hover:text-signal" href="#find-your-zone">
+            Find your zone
+          </a>
           <a className="transition hover:text-signal" href="#projects">
             Projects
           </a>
@@ -663,6 +667,13 @@ function CinematicHero() {
                   className="magnetic-button inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-black uppercase transition hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
                 >
                   Enter the Lab
+                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                </a>
+                <a
+                  href="#find-your-zone"
+                  className="inline-flex min-h-12 items-center gap-2 rounded-full border border-signal/56 px-6 py-3 text-sm font-bold uppercase text-signal transition hover:border-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+                >
+                  Find your zone
                   <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </a>
                 <a
@@ -1084,6 +1095,7 @@ function App() {
       <ScrollMarquee />
       <ThesisScene />
       <OperatingNotes />
+      <FindYourZone />
       <ProjectStack />
       <ProjectAtlas
         visibleProjects={visibleProjects}
