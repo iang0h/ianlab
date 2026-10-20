@@ -291,7 +291,10 @@ export default function FindYourZone() {
   const currentAnswer = answers[questionIndex]
   const progress = mode === 'quiz' ? ((questionIndex + 1) / questions.length) * 100 : 0
   const first = rankedZones[0]
-  const second = rankedZones[1]
+  const tiedLeaders = rankedZones.filter((zone) => zone.selected === first.selected)
+  const nextScore = rankedZones.find((zone) => zone.selected < first.selected)?.selected
+  const closeZones = nextScore === undefined ? [] : rankedZones.filter((zone) => zone.selected === nextScore)
+  const resultZones = tiedLeaders.length > 1 ? tiedLeaders : [first, ...closeZones]
 
   const chooseAnswer = (zone: ZoneId) => {
     setAnswers((current) => current.map((answer, index) => (index === questionIndex ? zone : answer)))
@@ -319,20 +322,13 @@ export default function FindYourZone() {
   }
 
   const copyResult = async () => {
+    const signalSummary = resultZones
+      .map((zone) => `${zone.name} (${zone.selected}/${zone.available})`)
+      .join('; ')
     const summary =
-      'Find Your Zone: ' +
-      first.name +
-      ' (' +
-      first.selected +
-      '/' +
-      first.available +
-      ') and ' +
-      second.name +
-      ' (' +
-      second.selected +
-      '/' +
-      second.available +
-      '). A reflection result, not a fixed label.'
+      (tiedLeaders.length > 1 ? 'Find Your Zone — tied lead signals: ' : 'Find Your Zone — leading and close signals: ') +
+      signalSummary +
+      '. A reflection result, not a fixed label.'
     try {
       await navigator.clipboard.writeText(summary)
       setCopied(true)
@@ -424,17 +420,19 @@ export default function FindYourZone() {
           {mode === 'results' ? (
             <div className="zone-results">
               <p className="zone-overline">Your strongest signals in this set</p>
-              <h3>{first.name}{first.selected === second.selected ? ' + ' + second.name : ''}</h3>
+              <h3>{tiedLeaders.length > 1 ? tiedLeaders.map((zone) => zone.name).join(' + ') : first.name}</h3>
               <p className="zone-results-intro">
-                {first.selected === second.selected
-                  ? 'Your top two zones are tied in these answers. That can point to a useful blend to explore.'
-                  : 'This was the pattern you selected most often. It is a starting point for reflection, not a fixed identity.'}
+                {tiedLeaders.length > 1
+                  ? `Your top ${tiedLeaders.length} zones are tied in these answers. That can point to a useful blend to explore.`
+                  : 'This was your leading zone, with the close signal shown below. Treat the pattern as a starting point for reflection, not a fixed identity.'}
               </p>
 
               <div className="zone-highlight-grid">
-                {[first, second].map((zone, index) => (
+                {resultZones.map((zone, index) => (
                   <article key={zone.id} className="zone-highlight" style={{ borderColor: zone.color }}>
-                    <span className="zone-highlight-rank">{index === 0 ? '01 / LEAD SIGNAL' : '02 / CLOSE SIGNAL'}</span>
+                    <span className="zone-highlight-rank">
+                      {tiedLeaders.length > 1 ? 'TIED / LEAD SIGNAL' : index === 0 ? '01 / LEAD SIGNAL' : '02 / CLOSE SIGNAL'}
+                    </span>
                     <h4>Zone {zone.id}: {zone.name}</h4>
                     <p>{zone.description}</p>
                     <span className="zone-signal">{zone.signal}</span>
