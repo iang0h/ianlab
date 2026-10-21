@@ -8,10 +8,10 @@ import {
   selectSharePair,
 } from './zone-share.js'
 
-test('builds a share URL with only the lead and close zone IDs', () => {
+test('builds a versioned share URL with only public result IDs', () => {
   assert.equal(
     buildZoneShareUrl('https://lab.iangoh.com', 6, 5),
-    'https://lab.iangoh.com/zone-result?lead=6&close=5',
+    'https://lab.iangoh.com/zone-result?lead=6&close=5&v=2',
   )
 })
 

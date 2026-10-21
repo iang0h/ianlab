@@ -3,20 +3,16 @@ import assert from 'node:assert/strict'
 import { zones } from './zones.js'
 import { renderZoneShareCardSvg } from './zone-share-svg.js'
 
-test('renders the lead and close zones in a 1200 by 630 share card', () => {
-  const svg = renderZoneShareCardSvg([zones[5], zones[4]])
-  const text = svg.replace(/<\/tspan><tspan[^>]*>/g, ' ').replace(/<[^>]+>/g, '')
+test('renders the lead and close zones in a 1200 by 630 share card', async () => {
+  const svg = await renderZoneShareCardSvg([zones[5], zones[4]])
 
   assert.match(svg, /viewBox="0 0 1200 630"/)
-  assert.match(svg, /01 \/ LEAD SIGNAL/)
-  assert.match(svg, /Build and create/)
-  assert.match(svg, /02 \/ CLOSE SIGNAL/)
-  assert.match(svg, /Manage resources/)
-  assert.match(text, /You make value by bringing people and resources together/)
+  assert.match(svg, /<title>Build and create \/ Manage resources<\/title>/)
+  assert.doesNotMatch(svg, /<text\b/)
 })
 
-test('escapes zone text before embedding it in SVG markup', () => {
-  const svg = renderZoneShareCardSvg([
+test('escapes zone text before embedding it in SVG markup', async () => {
+  const svg = await renderZoneShareCardSvg([
     { ...zones[0], name: '<script>&"' },
     zones[1],
   ])

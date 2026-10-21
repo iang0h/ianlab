@@ -1,4 +1,4 @@
-import { getZonePair } from './zone-share.js'
+import { getZonePair, ZONE_SHARE_VERSION } from './zone-share.js'
 
 const canonicalOrigin = 'https://lab.iangoh.com'
 
@@ -32,7 +32,11 @@ export function renderZoneShareHtml(leadId, closeId, origin) {
 
   const [lead, close] = pair
   const base = safeOrigin(origin)
-  const query = `lead=${lead.id}&close=${close.id}`
+  const query = new URLSearchParams({
+    lead: String(lead.id),
+    close: String(close.id),
+    v: ZONE_SHARE_VERSION,
+  }).toString()
   const canonical = `${base}/zone-result?${query}`
   const image = `${base}/zone-result.png?${query}`
   const title = `${lead.name} + ${close.name} | Find Your Zone`

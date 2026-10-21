@@ -1,5 +1,7 @@
 import { zones } from './zones.js'
 
+export const ZONE_SHARE_VERSION = '2'
+
 const zonesById = new Map(zones.map((zone) => [zone.id, zone]))
 
 function validId(value) {
@@ -56,6 +58,7 @@ export function buildZoneShareUrl(origin, leadId, closeId) {
     if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
     url.searchParams.set('lead', String(Number(leadId)))
     url.searchParams.set('close', String(Number(closeId)))
+    url.searchParams.set('v', ZONE_SHARE_VERSION)
     return url.toString()
   } catch {
     return null
