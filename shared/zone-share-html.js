@@ -1,4 +1,4 @@
-import { getZonePair, ZONE_SHARE_VERSION } from './zone-share.js'
+import { getZonePair, getZoneShareCardPath, ZONE_SHARE_VERSION } from './zone-share.js'
 
 const canonicalOrigin = 'https://lab.iangoh.com'
 
@@ -38,7 +38,7 @@ export function renderZoneShareHtml(leadId, closeId, origin) {
     v: ZONE_SHARE_VERSION,
   }).toString()
   const canonical = `${base}/zone-result?${query}`
-  const image = `${base}/zone-result.png?${query}`
+  const image = `${base}${getZoneShareCardPath(lead.id, close.id)}`
   const title = `${lead.name} + ${close.name} | Find Your Zone`
   const description = `Explore your leading signal, ${lead.name}, and close signal, ${close.name}. A reflection result from Ian Goh Lab, not a fixed label.`
 

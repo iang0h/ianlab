@@ -5,14 +5,20 @@ import {
   buildZoneShareUrl,
   getZonePair,
   getZonePairFromSearch,
+  getZoneShareCardPath,
   selectSharePair,
 } from './zone-share.js'
 
 test('builds a versioned share URL with only public result IDs', () => {
   assert.equal(
     buildZoneShareUrl('https://lab.iangoh.com', 6, 5),
-    'https://lab.iangoh.com/zone-result?lead=6&close=5&v=2',
+    'https://lab.iangoh.com/zone-result?lead=6&close=5&v=3',
   )
+})
+
+test('uses a versioned static image for each valid zone pairing', () => {
+  assert.equal(getZoneShareCardPath(6, 5), '/zone-share-cards/6-5.png?v=3')
+  assert.equal(getZoneShareCardPath(6, 6), null)
 })
 
 test('rejects unknown, malformed, or repeated zone IDs', () => {

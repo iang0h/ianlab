@@ -1,6 +1,6 @@
 import { zones } from './zones.js'
 
-export const ZONE_SHARE_VERSION = '2'
+export const ZONE_SHARE_VERSION = '3'
 
 const zonesById = new Map(zones.map((zone) => [zone.id, zone]))
 
@@ -26,6 +26,12 @@ export function getZonePairFromSearch(search) {
   const close = params.getAll('close')
   if (lead.length !== 1 || close.length !== 1) return null
   return getZonePair(lead[0], close[0])
+}
+
+export function getZoneShareCardPath(leadId, closeId) {
+  const pair = getZonePair(leadId, closeId)
+  if (!pair) return null
+  return `/zone-share-cards/${pair[0].id}-${pair[1].id}.png?v=${ZONE_SHARE_VERSION}`
 }
 
 export function selectSharePair(rankedZones) {
