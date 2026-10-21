@@ -1,0 +1,31 @@
+.zone-emblem {
+  display: grid;
+  width: 5.6rem;
+  height: 5.6rem;
+  flex: 0 0 5.6rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--zone-emblem-color), transparent 58%);
+  border-radius: 50%;
+  background: rgba(244, 247, 234, 0.035);
+}
+
+.zone-emblem canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.zone-emblem-fallback {
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 2px solid var(--zone-emblem-color);
+  border-radius: 0.35rem;
+  background: rgba(244, 247, 234, 0.1);
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zone-emblem {
+    transition: none;
+  }
+}

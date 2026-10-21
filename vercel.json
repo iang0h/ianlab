@@ -3,5 +3,10 @@
   "framework": "vite",
   "installCommand": "npm install",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/zone-result.png", "destination": "/api/zone-card" },
+    { "source": "/zone-result", "destination": "/api/zone-result" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

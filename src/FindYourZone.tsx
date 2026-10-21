@@ -1,253 +1,199 @@
-import { useMemo, useState } from 'react'
-import { ArrowLeft, ArrowRight, Check, Copy, RotateCcw, Sparkles } from 'lucide-react'
+import { lazy, Suspense, useMemo, useState } from 'react'
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, RotateCcw, Share2, Sparkles } from 'lucide-react'
+import { zones } from '../shared/zones.js'
+import { buildZoneShareUrl, selectSharePair } from '../shared/zone-share.js'
+import { ZoneExplanation, ZoneGuide } from './ZoneGuide'
 import './FindYourZone.css'
 
-type ZoneId = 1 | 2 | 3 | 4 | 5 | 6 | 7
+const ZoneEmblem = lazy(() => import('./ZoneEmblem'))
 
-type Zone = {
-  id: ZoneId
-  name: string
-  description: string
-  signal: string
-  color: string
-}
+type ZoneId = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 type Question = {
   prompt: string
   options: Array<{ zone: ZoneId; label: string }>
 }
 
-const zones: Zone[] = [
-  {
-    id: 1,
-    name: 'Uncover the unknown',
-    description: 'You make value by exploring questions, finding patterns, and making the unclear easier to understand.',
-    signal: 'Research · discovery · big-picture thinking',
-    color: '#58E6FF',
-  },
-  {
-    id: 2,
-    name: 'Execute masterfully',
-    description: 'You make value by taking responsibility for the work and carrying it through with care and precision.',
-    signal: 'Craft · follow-through · operational focus',
-    color: '#D9FF4A',
-  },
-  {
-    id: 3,
-    name: 'Impart knowledge',
-    description: 'You make value by turning what you know into clear, structured explanations that help others understand.',
-    signal: 'Teaching · clarity · shared understanding',
-    color: '#C68CFF',
-  },
-  {
-    id: 4,
-    name: 'Empower people',
-    description: 'You make value by encouraging people, lifting their confidence, and helping them move forward together.',
-    signal: 'Coaching · encouragement · facilitation',
-    color: '#FF7A1A',
-  },
-  {
-    id: 5,
-    name: 'Manage resources',
-    description: 'You make value by coordinating people, time, talent, and opportunities so they are used well.',
-    signal: 'Coordination · stewardship · better allocation',
-    color: '#E2B84D',
-  },
-  {
-    id: 6,
-    name: 'Build and create',
-    description: 'You make value by bringing people and resources together to turn a vision into something real.',
-    signal: 'Initiative · direction · making things happen',
-    color: '#58E6FF',
-  },
-  {
-    id: 7,
-    name: 'Meet needs',
-    description: 'You make value by noticing what is missing, easing a difficulty, and helping people or systems work better.',
-    signal: 'Problem solving · practical care · closure',
-    color: '#D9FF4A',
-  },
-]
 
 const questions: Question[] = [
   {
-    prompt: 'When a group faces something unfamiliar, which contribution have you been most proud to make?',
+    prompt: 'When your group faces a new problem, what do you like to do?',
     options: [
-      { zone: 1, label: 'Investigate the unknown until a clear explanation starts to emerge.' },
-      { zone: 2, label: 'Take a defined task and carry it through carefully.' },
-      { zone: 3, label: 'Make the facts and ideas easier for everyone to understand.' },
-      { zone: 4, label: 'Help people regain confidence and move forward together.' },
+      { zone: 1, label: 'Find out what is happening and why.' },
+      { zone: 2, label: 'Take a task and finish it carefully.' },
+      { zone: 3, label: 'Explain the facts so everyone understands.' },
+      { zone: 4, label: 'Help the group feel confident and keep going.' },
     ],
   },
   {
-    prompt: 'When a promising project loses momentum, what kind of contribution tends to be valued from you?',
+    prompt: 'When a project gets stuck, what do you usually do?',
     options: [
-      { zone: 2, label: 'Step into the hands-on work and complete the parts that are still open.' },
-      { zone: 3, label: 'Untangle the information and make the next steps clear.' },
-      { zone: 4, label: 'Lift the mood and help the team believe progress is still possible.' },
-      { zone: 5, label: 'Rebalance people, time, and tools around the work that matters most.' },
+      { zone: 2, label: 'Finish the tasks that are still waiting.' },
+      { zone: 3, label: 'Make the problem clear and suggest what to do next.' },
+      { zone: 4, label: 'Encourage the team to keep going.' },
+      { zone: 5, label: 'Help decide how to use the team’s time and tools.' },
     ],
   },
   {
-    prompt: 'You join a project with a worthwhile goal but no clear path. What feels most useful to take on?',
+    prompt: 'You join a project, but no one knows what to do next. What would you do?',
     options: [
-      { zone: 3, label: 'Explain the problem and turn what is known into a clear guide.' },
-      { zone: 4, label: 'Bring people into the conversation and help them feel able to contribute.' },
-      { zone: 5, label: 'Coordinate the people and resources needed for steady progress.' },
-      { zone: 6, label: 'Shape a direction, gather a team, and start building toward the goal.' },
+      { zone: 3, label: 'Explain what we know and write down the next steps.' },
+      { zone: 4, label: 'Invite people to share ideas and take part.' },
+      { zone: 5, label: 'Organize the people and tools needed.' },
+      { zone: 6, label: 'Choose a direction, bring people together, and start building.' },
     ],
   },
   {
-    prompt: 'A plan is ambitious, but the team has limited time and capacity. Where do you naturally help?',
+    prompt: 'The team has more work than time. How would you help?',
     options: [
-      { zone: 4, label: 'Keep people encouraged and connected to why the work matters.' },
-      { zone: 5, label: 'Make thoughtful trade-offs with the time, people, and tools available.' },
-      { zone: 6, label: 'Set a decisive approach and delegate the work needed to reach the goal.' },
-      { zone: 7, label: 'Find the biggest obstacle and remove the thing holding everyone back.' },
+      { zone: 4, label: 'Encourage the team and remind them why the work matters.' },
+      { zone: 5, label: 'Choose how to use the time, people, and tools.' },
+      { zone: 6, label: 'Set a direction and divide up the work.' },
+      { zone: 7, label: 'Find what is blocking progress and fix it.' },
     ],
   },
   {
-    prompt: 'After delivering something useful, which next contribution would you most want to make?',
+    prompt: 'After finishing a useful project, what would you want to do next?',
     options: [
-      { zone: 5, label: 'Make sure the resources behind it are cared for and used well.' },
-      { zone: 6, label: 'Build the next version or bring a new idea into reality.' },
-      { zone: 7, label: 'Address the remaining need or difficulty people are still facing.' },
-      { zone: 1, label: 'Explore why it worked and what the result reveals.' },
+      { zone: 5, label: 'Make sure the time, money, and tools are used well.' },
+      { zone: 6, label: 'Build the next version or make a new idea real.' },
+      { zone: 7, label: 'Help with the problem people still have.' },
+      { zone: 1, label: 'Find out why it worked and what we can learn.' },
     ],
   },
   {
-    prompt: 'When someone thanks you for a contribution, which reason sounds most familiar?',
+    prompt: 'What do people usually thank you for?',
     options: [
-      { zone: 6, label: 'You brought people together and moved an important goal forward.' },
-      { zone: 7, label: 'You noticed a problem and made life easier for someone.' },
-      { zone: 1, label: 'You helped us see what was happening and why.' },
-      { zone: 2, label: 'You took ownership and made sure the job was done properly.' },
+      { zone: 6, label: 'Bringing people together and moving an important goal forward.' },
+      { zone: 7, label: 'Noticing a problem and making things easier for someone.' },
+      { zone: 1, label: 'Helping us understand what was happening and why.' },
+      { zone: 2, label: 'Taking responsibility and getting the work done well.' },
     ],
   },
   {
-    prompt: 'When the same problem keeps appearing, what kind of contribution feels most satisfying?',
+    prompt: 'If the same problem keeps coming back, what would you most like to do?',
     options: [
-      { zone: 7, label: 'Find the unmet need and do something practical to address it.' },
-      { zone: 1, label: 'Trace the pattern back to its cause and understand it more deeply.' },
-      { zone: 2, label: 'Tighten the process so the work is completed reliably each time.' },
-      { zone: 3, label: 'Explain the pattern so other people can recognize and handle it.' },
+      { zone: 7, label: 'Find out what people need and help meet that need.' },
+      { zone: 1, label: 'Look for the cause of the problem.' },
+      { zone: 2, label: 'Improve the steps so the job gets done well each time.' },
+      { zone: 3, label: 'Explain the problem so others can spot and solve it.' },
     ],
   },
   {
-    prompt: 'Think of a time you helped someone learn. Which part did you most enjoy?',
+    prompt: 'When you help someone learn, what do you enjoy most?',
     options: [
-      { zone: 1, label: 'Explore the principles behind the subject before drawing conclusions.' },
-      { zone: 2, label: 'Demonstrate the steps and help them practise until they can do it.' },
-      { zone: 3, label: 'Build a clear, structured explanation that makes the subject click.' },
-      { zone: 4, label: 'Encourage their confidence and make it safe to ask questions.' },
+      { zone: 1, label: 'Find out how the subject works before explaining it.' },
+      { zone: 2, label: 'Show them the steps and let them practise.' },
+      { zone: 3, label: 'Explain it clearly, step by step.' },
+      { zone: 4, label: 'Encourage them to ask questions and keep trying.' },
     ],
   },
   {
-    prompt: 'A group is overwhelmed before a deadline. What would feel like your best contribution?',
+    prompt: 'The team is stressed about a deadline. How would you help?',
     options: [
-      { zone: 2, label: 'Take on important tasks and finish them to a high standard.' },
-      { zone: 3, label: 'Sort the information so everyone understands what matters now.' },
-      { zone: 4, label: 'Help people feel supported and focused instead of defeated.' },
-      { zone: 5, label: 'Reorganize the workload so the available time and skills go further.' },
+      { zone: 2, label: 'Take an important task and finish it well.' },
+      { zone: 3, label: 'Explain what needs attention first.' },
+      { zone: 4, label: 'Support the team and help them stay focused.' },
+      { zone: 5, label: 'Change who does what so the team can use its time and skills well.' },
     ],
   },
   {
-    prompt: 'An idea has support but no clear owner. Which responsibility would you choose?',
+    prompt: 'A good idea has support, but no one is leading it. What would you do?',
     options: [
-      { zone: 3, label: 'Help everyone understand the idea and how it could work.' },
-      { zone: 4, label: 'Bring the right people together and invite them into the effort.' },
-      { zone: 5, label: 'Coordinate the people, time, and opportunities it will need.' },
-      { zone: 6, label: 'Own the direction, make the calls, and turn the idea into a working project.' },
+      { zone: 3, label: 'Explain the idea and how it could work.' },
+      { zone: 4, label: 'Bring people together and ask them to join in.' },
+      { zone: 5, label: 'Work out who and what the idea needs.' },
+      { zone: 6, label: 'Lead the work and turn the idea into a real project.' },
     ],
   },
   {
-    prompt: 'A service keeps failing people in predictable ways. Where would you want to contribute?',
+    prompt: 'A service often lets people down. What would you want to do?',
     options: [
-      { zone: 4, label: 'Support the people delivering it so they can serve others with confidence.' },
-      { zone: 5, label: 'Assign clear owners and resources to the parts that need attention.' },
-      { zone: 6, label: 'Mobilize a team to redesign the service and make the change happen.' },
-      { zone: 7, label: 'Focus on the unmet need and remove the difficulty people keep encountering.' },
+      { zone: 4, label: 'Support the staff so they can help people with confidence.' },
+      { zone: 5, label: 'Give each task a clear owner and the help it needs.' },
+      { zone: 6, label: 'Bring a team together to redesign the service and make the changes.' },
+      { zone: 7, label: 'Find what is making things hard for people and fix it.' },
     ],
   },
   {
-    prompt: 'You have time for one meaningful contribution this week. Which outcome would you choose?',
+    prompt: 'You have time to help with one thing this week. What would you choose?',
     options: [
-      { zone: 5, label: 'Use the team’s time and abilities in a way that creates more value.' },
-      { zone: 6, label: 'Start or build something that moves a larger goal forward.' },
-      { zone: 7, label: 'Relieve a practical pain point for someone who needs help.' },
-      { zone: 1, label: 'Investigate a question that could change how the problem is understood.' },
+      { zone: 5, label: 'Help the team use its time and skills well.' },
+      { zone: 6, label: 'Start building something that moves an important goal forward.' },
+      { zone: 7, label: 'Make a problem easier for someone who needs help.' },
+      { zone: 1, label: 'Look into a question that could change how we see the problem.' },
     ],
   },
   {
-    prompt: 'When people ask for your help, which request do you most enjoy saying yes to?',
+    prompt: 'What kind of help do you most enjoy giving?',
     options: [
-      { zone: 6, label: '“Can you help us choose a direction and get this moving?”' },
+      { zone: 6, label: '“Can you help us choose a direction and get started?”' },
       { zone: 7, label: '“Can you help us fix what is getting in the way?”' },
-      { zone: 1, label: '“Can you help us understand what is really going on?”' },
-      { zone: 2, label: '“Can you take this on and make sure it gets done well?”' },
+      { zone: 1, label: '“Can you help us understand what is happening?”' },
+      { zone: 2, label: '“Can you do this job and make sure it is done well?”' },
     ],
   },
   {
-    prompt: 'Looking back at work people appreciated, which feedback feels closest to your experience?',
+    prompt: 'Which of these sounds most like something people have said to you?',
     options: [
-      { zone: 7, label: '“You saw what was missing and did something about it.”' },
-      { zone: 1, label: '“You helped us understand the pattern behind it.”' },
-      { zone: 2, label: '“You followed through and made the result dependable.”' },
-      { zone: 3, label: '“You explained it in a way that made sense to everyone.”' },
+      { zone: 7, label: '“You noticed what was missing and helped fix it.”' },
+      { zone: 1, label: '“You helped us understand why it was happening.”' },
+      { zone: 2, label: '“You followed through and made sure it was done well.”' },
+      { zone: 3, label: '“You explained it so everyone could understand.”' },
     ],
   },
   {
-    prompt: 'For a solution to keep helping after you step away, what would you most want to make sure of?',
+    prompt: 'For a solution to keep helping after you leave, what matters most?',
     options: [
-      { zone: 1, label: 'The underlying idea is well understood and the reasoning holds up.' },
-      { zone: 2, label: 'The method is reliable and the details are handled properly.' },
-      { zone: 3, label: 'The knowledge is clearly documented and easy for others to learn.' },
-      { zone: 4, label: 'People feel capable and supported enough to carry it forward.' },
+      { zone: 1, label: 'People understand the idea and why it works.' },
+      { zone: 2, label: 'The steps are reliable and the details are right.' },
+      { zone: 3, label: 'Others can learn from clear notes or instructions.' },
+      { zone: 4, label: 'People feel ready and supported to continue.' },
     ],
   },
   {
-    prompt: 'An opportunity comes with uncertainty and a small team. Which part would you take on?',
+    prompt: 'A small team has a new opportunity, but some things are uncertain. What would you take on?',
     options: [
-      { zone: 2, label: 'Handle the practical work and make sure the essentials are covered.' },
-      { zone: 3, label: 'Map what the team needs to know and make it understandable.' },
-      { zone: 4, label: 'Help people find confidence and a shared reason to try.' },
-      { zone: 5, label: 'Plan how to use the limited time, skills, and budget well.' },
+      { zone: 2, label: 'Do the practical tasks and cover the essentials.' },
+      { zone: 3, label: 'Find out what the team needs to know and explain it.' },
+      { zone: 4, label: 'Help the team feel confident enough to try.' },
+      { zone: 5, label: 'Plan how to use the time, skills, and budget.' },
     ],
   },
   {
-    prompt: 'A community is growing quickly. What would you most like to help strengthen?',
+    prompt: 'A group of people is growing quickly. What would you like to help with?',
     options: [
-      { zone: 3, label: 'Teach shared practices so newcomers can understand and take part.' },
-      { zone: 4, label: 'Welcome people, build confidence, and help them feel included.' },
-      { zone: 5, label: 'Organize the people and opportunities so the community can grow well.' },
-      { zone: 6, label: 'Build a team and structure that can carry the community into its next stage.' },
+      { zone: 3, label: 'Show new people how things work so they can join in.' },
+      { zone: 4, label: 'Welcome people and help them feel included.' },
+      { zone: 5, label: 'Organize people and activities so the group can grow.' },
+      { zone: 6, label: 'Build a team and plan for what comes next.' },
     ],
   },
   {
-    prompt: 'You notice a person or a system is being held back. What do you most want to do?',
+    prompt: 'You see something holding a person or team back. What would you do?',
     options: [
-      { zone: 4, label: 'Help the person regain confidence and see a way forward.' },
-      { zone: 5, label: 'Put available support and resources where they can make the most difference.' },
-      { zone: 6, label: 'Lead a change that brings people together around a better way.' },
-      { zone: 7, label: 'Address the specific block or missing support that is causing the difficulty.' },
+      { zone: 4, label: 'Help them feel confident and see what they can do next.' },
+      { zone: 5, label: 'Put available help where it is needed most.' },
+      { zone: 6, label: 'Bring people together to make a better way of working.' },
+      { zone: 7, label: 'Find and fix the problem or missing support.' },
     ],
   },
   {
-    prompt: 'After a successful launch, where would you most want to add value next?',
+    prompt: 'A new product or project has launched successfully. What would you like to do next?',
     options: [
-      { zone: 5, label: 'Help the team scale its resources without wasting what it has built.' },
-      { zone: 6, label: 'Create the next version and pursue the bigger opportunity.' },
-      { zone: 7, label: 'Close the gaps people still report and make the experience more helpful.' },
-      { zone: 1, label: 'Study what made the launch work and what remains unknown.' },
+      { zone: 5, label: 'Help the team grow without wasting what it has built.' },
+      { zone: 6, label: 'Build the next version or go after a bigger opportunity.' },
+      { zone: 7, label: 'Fix the problems people still report and make it work better.' },
+      { zone: 1, label: 'Find out why the launch worked and what we still need to learn.' },
     ],
   },
   {
-    prompt: 'Recall a moment when your contribution felt useful and appreciated. Which part would you like more of?',
+    prompt: 'Think of a time your work helped someone. Which part would you like to do more often?',
     options: [
-      { zone: 6, label: 'Taking a vision and turning it into something people can use.' },
-      { zone: 7, label: 'Noticing a need and helping someone through a difficulty.' },
-      { zone: 1, label: 'Making sense of an unanswered question or unfamiliar situation.' },
-      { zone: 2, label: 'Doing careful work and knowing the details were right.' },
+      { zone: 6, label: 'Turn an idea into something people can use.' },
+      { zone: 7, label: 'Notice what someone needs and help them.' },
+      { zone: 1, label: 'Work out an answer to a hard question or new situation.' },
+      { zone: 2, label: 'Do careful work and get the details right.' },
     ],
   },
 ]
@@ -267,6 +213,8 @@ export default function FindYourZone() {
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Array<ZoneId | null>>(() => Array(questions.length).fill(null))
   const [copied, setCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const [shareStatus, setShareStatus] = useState('')
 
   const rankedZones = useMemo(() => {
     const selected = initialScores()
@@ -295,16 +243,22 @@ export default function FindYourZone() {
   const nextScore = rankedZones.find((zone) => zone.selected < first.selected)?.selected
   const closeZones = nextScore === undefined ? [] : rankedZones.filter((zone) => zone.selected === nextScore)
   const resultZones = tiedLeaders.length > 1 ? tiedLeaders : [first, ...closeZones]
+  const sharePairIds = selectSharePair(rankedZones)
+  const shareZones = sharePairIds.map((id) => rankedZones.find((zone) => zone.id === id)).filter((zone) => zone !== undefined)
 
   const chooseAnswer = (zone: ZoneId) => {
     setAnswers((current) => current.map((answer, index) => (index === questionIndex ? zone : answer)))
     setCopied(false)
+    setLinkCopied(false)
+    setShareStatus('')
   }
 
   const startQuiz = () => {
     setQuestionIndex(0)
     setAnswers(Array(questions.length).fill(null))
     setCopied(false)
+    setLinkCopied(false)
+    setShareStatus('')
     setMode('quiz')
   }
 
@@ -337,6 +291,48 @@ export default function FindYourZone() {
     }
   }
 
+  const copyShareLink = async (shareUrl?: string) => {
+    const url = shareUrl ?? buildZoneShareUrl(window.location.origin, shareZones[0]?.id, shareZones[1]?.id)
+    if (!url) {
+      setShareStatus('This result link is unavailable.')
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(url)
+      setLinkCopied(true)
+      setShareStatus('Link copied')
+    } catch {
+      setLinkCopied(false)
+      setShareStatus('Could not copy the link on this device.')
+    }
+  }
+
+  const shareResult = async () => {
+    const shareUrl = buildZoneShareUrl(window.location.origin, shareZones[0]?.id, shareZones[1]?.id)
+    if (!shareUrl || shareZones.length !== 2) {
+      setShareStatus('This result link is unavailable.')
+      return
+    }
+
+    if (!navigator.share) {
+      await copyShareLink(shareUrl)
+      return
+    }
+
+    try {
+      await navigator.share({
+        title: 'My Find Your Zone result',
+        text: `My leading signal is ${shareZones[0].name}; my close signal is ${shareZones[1].name}.`,
+        url: shareUrl,
+      })
+      setShareStatus('')
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return
+      setShareStatus('Sharing is unavailable. You can copy the link instead.')
+    }
+  }
+
   return (
     <section id="find-your-zone" className="zone-section">
       <div className="zone-wrap">
@@ -344,12 +340,10 @@ export default function FindYourZone() {
           <div>
             <p className="zone-kicker"><Sparkles size={15} aria-hidden="true" /> A reflection exercise</p>
             <h2>Find your zone</h2>
-            <p className="zone-lead">
-              Notice the kind of contribution you return to when your work matters and other people feel the benefit.
-            </p>
+            <p className="zone-lead">Think about the work you enjoy and how you like to help.</p>
           </div>
           <aside className="zone-note">
-            <span>7 contribution zones</span>
+            <span>7 ways of helping</span>
             <strong>20 questions</strong>
             <p>Your answers stay in this page. We calculate the pattern in your browser and do not send or store your choices.</p>
           </aside>
@@ -360,20 +354,21 @@ export default function FindYourZone() {
             <div className="zone-intro">
               <div>
                 <p className="zone-overline">Start with a real memory</p>
-                <h3>What kind of work feels like a meaningful contribution?</h3>
+                <h3>Think of a time you helped someone.</h3>
                 <p>
-                  Think about moments when you helped create value and someone else appreciated the result. Choose the
-                  response that feels closest to what you actually did, not the one that sounds most impressive.
+                  Think about a work project, a team task, or a time you helped someone in daily life. Choose what you
+                  actually did, not what sounds most impressive.
                 </p>
               </div>
               <div className="zone-intro-bottom">
                 <p>
-                  This is a reflection tool, not a validated or definitive assessment. Use the result as a prompt, then
-                  check it against your own experience.
+                  This is a reflection tool, not a scientific or definitive test. Use the result as a prompt, then
+                  compare it with your own experience.
                 </p>
                 <button className="zone-button zone-button-primary" type="button" onClick={startQuiz}>
                   Begin the questions <ArrowRight size={17} aria-hidden="true" />
                 </button>
+                <a className="zone-guide-link" href="#zone-guide">Explore the seven zones <ArrowRight size={15} aria-hidden="true" /></a>
               </div>
             </div>
           ) : null}
@@ -427,16 +422,27 @@ export default function FindYourZone() {
                   : 'This was your leading zone, with the close signal shown below. Treat the pattern as a starting point for reflection, not a fixed identity.'}
               </p>
 
-              <div className="zone-highlight-grid">
-                {resultZones.map((zone, index) => (
+              <div className="zone-highlight-grid" aria-label="Your lead and close zone card">
+                {shareZones.map((zone, index) => (
                   <article key={zone.id} className="zone-highlight" style={{ borderColor: zone.color }}>
-                    <span className="zone-highlight-rank">
-                      {tiedLeaders.length > 1 ? 'TIED / LEAD SIGNAL' : index === 0 ? '01 / LEAD SIGNAL' : '02 / CLOSE SIGNAL'}
-                    </span>
+                    <div className="zone-highlight-header">
+                      <span className="zone-highlight-rank">
+                        {index === 0 ? '01 / LEAD SIGNAL' : '02 / CLOSE SIGNAL'}
+                      </span>
+                      {index < 2 ? (
+                        <Suspense fallback={<span className="zone-emblem-placeholder" aria-hidden="true" />}>
+                          <ZoneEmblem zoneId={zone.id} label={`3D symbol for Zone ${zone.id}: ${zone.name}`} />
+                        </Suspense>
+                      ) : null}
+                    </div>
                     <h4>Zone {zone.id}: {zone.name}</h4>
                     <p>{zone.description}</p>
                     <span className="zone-signal">{zone.signal}</span>
                     <span className="zone-count">Chosen {zone.selected} of {zone.available} times it appeared</span>
+                    <details className="zone-highlight-more">
+                      <summary>Explore this zone <ChevronDown size={16} aria-hidden="true" /></summary>
+                      <ZoneExplanation zone={zone} />
+                    </details>
                   </article>
                 ))}
               </div>
@@ -445,11 +451,15 @@ export default function FindYourZone() {
                 <summary>See all seven zones</summary>
                 <div className="zone-score-list">
                   {rankedZones.map((zone) => (
-                    <div className="zone-score-row" key={zone.id}>
-                      <span>Zone {zone.id} · {zone.name}</span>
-                      <span>{zone.selected} / {zone.available}</span>
-                      <span className="zone-score-track"><span style={{ width: (zone.selected / zone.available) * 100 + '%', backgroundColor: zone.color }} /></span>
-                    </div>
+                    <details className="zone-score-detail" key={zone.id}>
+                      <summary className="zone-score-row">
+                        <span>Zone {zone.id} · {zone.name}</span>
+                        <span>{zone.selected} / {zone.available}</span>
+                        <span className="zone-score-track"><span style={{ width: (zone.selected / zone.available) * 100 + '%', backgroundColor: zone.color }} /></span>
+                        <ChevronDown className="zone-score-chevron" size={16} aria-hidden="true" />
+                      </summary>
+                      <ZoneExplanation zone={zone} />
+                    </details>
                   ))}
                 </div>
               </details>
@@ -463,16 +473,25 @@ export default function FindYourZone() {
                 <button className="zone-button zone-button-quiet" type="button" onClick={copyResult}>
                   <Copy size={15} aria-hidden="true" /> {copied ? 'Copied' : 'Copy my result'}
                 </button>
+                <button className="zone-button zone-button-quiet" type="button" onClick={() => void copyShareLink()}>
+                  <Copy size={15} aria-hidden="true" /> {linkCopied ? 'Link copied' : 'Copy link'}
+                </button>
+                <button className="zone-button zone-button-primary" type="button" onClick={() => void shareResult()}>
+                  <Share2 size={15} aria-hidden="true" /> Share result
+                </button>
                 <button className="zone-button zone-button-primary" type="button" onClick={startQuiz}>
                   <RotateCcw size={15} aria-hidden="true" /> Start again
                 </button>
               </div>
+              <p className="zone-share-status" role="status" aria-live="polite">{shareStatus}</p>
             </div>
           ) : null}
         </div>
 
+        {mode !== 'results' ? <ZoneGuide /> : null}
+
         <p className="zone-source-note">
-          The seven zones are adapted from Ian Goh’s “Finding Your Passion” framework. The questions are prompts for self-reflection, not a validated psychological measure.
+          These seven zones are adapted from Ian Goh’s “Finding Your Passion” framework. This is a reflection exercise, not a scientific or psychological test.
         </p>
       </div>
     </section>
